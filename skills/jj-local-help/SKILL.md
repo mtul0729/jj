@@ -19,66 +19,96 @@ For command behavior:
 1. Prefer live local help text from `jj`.
 2. Use this skill's concept notes only for stable mental models.
 3. If concept notes conflict with live help, trust live help and state that notes may lag behind the installed version.
+4. For keyword topics (`jj help -k ...`), treat keyword help as authoritative over `references/core-concepts.md`.
 
-## Runtime Lookup Workflow
+## Help System Bootstrap Workflow (Always First)
 
-### 1) Start from full command index (`jj help`)
-
-Always run `jj help` first to get the authoritative top-level subcommand list for the installed version.
-
-Run:
+Run these before answering command or concept questions:
 
 ```bash
 skills/jj-local-help/scripts/jj_help.sh help
+skills/jj-local-help/scripts/jj_help.sh help help
 ```
 
-Use this output to:
-- confirm command names exist in the current version
-- avoid suggesting removed or renamed commands
-- decide the nearest command family before drilling down
+Use the first command to confirm top-level subcommands for the installed version.
+Use the second command to confirm help semantics and keyword topics (`-k/--keyword`).
 
-### 2) Identify target command path
+## Query Routing Workflow
 
-- Convert user intent to a command path, e.g.:
-  - "How do I rebase?" -> `rebase`
-  - "Push to a Git remote" -> `git push`
-  - "Show operation history" -> `operation log`
+### 1) Classify the user request
 
-### 3) Fetch live help for that path
+- Command-oriented: "How do I run X?"
+- Concept-oriented: "What does X mean in jj?"
+- Troubleshooting-oriented: "Why did command X fail?"
 
-Run:
+### 2) Route command-oriented requests
+
+Resolve the command path, then fetch live help:
 
 ```bash
 skills/jj-local-help/scripts/jj_help.sh rebase
 skills/jj-local-help/scripts/jj_help.sh git push
+skills/jj-local-help/scripts/jj_help.sh operation log
 ```
 
-The script tries:
-1. `jj help <command path>`
-2. `jj <command path> --help`
+### 3) Route concept-oriented requests
 
-### 4) Compose response
+First try keyword help:
 
-- Start with a direct answer.
-- Include 1-3 runnable command examples.
-- Mention relevant caveats (immutable commits, working copy behavior, etc.).
-- When helpful, include the installed version from `jj --version`.
+```bash
+skills/jj-local-help/scripts/jj_help.sh help -k tutorial
+skills/jj-local-help/scripts/jj_help.sh help -k glossary
+skills/jj-local-help/scripts/jj_help.sh help -k config
+skills/jj-local-help/scripts/jj_help.sh help -k revsets
+skills/jj-local-help/scripts/jj_help.sh help -k templates
+skills/jj-local-help/scripts/jj_help.sh help -k filesets
+```
 
-## Core Concepts (Stable Reference)
+Treat `jj help -k` output as the primary source of truth for those topics.
+Use `references/core-concepts.md` only to:
+- organize and simplify explanations
+- connect concepts to practical command workflows
+- cover concepts not directly exposed by `-k` topics
 
-Use `references/core-concepts.md` for stable concepts:
-- Working copy is represented by a commit (`@`)
-- Revision sets (revsets) for selecting history
-- Operation log and undo/redo model
-- Bookmarks vs Git branches
-- History rewriting as a primary workflow
+When both are available, cite and follow `jj help -k` first, then add a concise synthesis from `core-concepts.md`.
 
-Do not copy large concept sections into every response. Pull only what is needed.
+### 4) Route troubleshooting requests
+
+- Check command help for expected flags/arguments.
+- Point out likely mismatch with current version/configuration.
+- Suggest exact follow-up command(s) to validate state.
+
+## Concept Priority and Mapping
+
+Use this mapping for concept-first questions:
+
+- Getting started and learning path -> `tutorial`
+- Term meaning or ambiguous wording -> `glossary`
+- Behavior differences or policy configuration -> `config`
+- Revision selection expressions -> `revsets`
+- Output customization -> `templates`
+- Path/file selection expressions -> `filesets`
+
+## Response Contract (Required)
+
+For every response, use this order:
+1. Direct answer in one sentence.
+2. Source line: installed version (`jj --version`) and help path used.
+3. 1-3 runnable commands.
+4. Caveat or pitfall note if relevant.
+
+For concept answers, default to three layers:
+1. What it is.
+2. Why it matters.
+3. Common pitfall or boundary.
+
+Do not dump full docs. Extract only the parts needed for the specific question.
 
 ## Fallback Behavior
 
 - If local `jj` is unavailable, say that live help cannot be queried and provide best-effort guidance with an explicit uncertainty note.
 - If command lookup fails, ask a focused follow-up or suggest discovery:
   - `jj --help`
+  - `jj help help`
   - `jj help <command>`
-  - `jj help -k <keyword>` (for docs topics such as `revsets`, `templates`, `config`, `tutorial`)
+  - `jj help -k <keyword>` (for docs topics such as `tutorial`, `glossary`, `config`, `revsets`, `templates`, `filesets`)

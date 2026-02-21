@@ -7,6 +7,8 @@ Usage:
   jj_help.sh <command-path...>
 
 Examples:
+  jj_help.sh help
+  jj_help.sh help help
   jj_help.sh log
   jj_help.sh rebase
   jj_help.sh git push
