@@ -35,3 +35,10 @@
 - Include rationale in commit messages, not just what changed.
 - PRs should provide context for reviewers, link relevant issues/design docs, and include docs/tests for behavior changes.
 - Large or architectural changes should go through the design doc process in `docs/design_docs.md`.
+
+## Version Control Workflow
+- Use `jj commit` for normal submission flow.
+- Treat `jj rebase`, `jj squash`, `jj abandon`, and other history-rewriting commands as high risk; confirm before running them.
+- Keep work accumulated on `@` during normal iteration. Use `jj desc` at the start of a task and keep it accurate whenever the scope changes.
+- If `@` already has changes, update the description before continuing.
+- Use `jj new` only when the current task is complete enough to split from the next one.
