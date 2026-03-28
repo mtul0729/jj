@@ -37,8 +37,9 @@
 - Large or architectural changes should go through the design doc process in `docs/design_docs.md`.
 
 ## Version Control Workflow
-- Use `jj commit` for normal submission flow.
 - Treat `jj rebase`, `jj squash`, `jj abandon`, and other history-rewriting commands as high risk; confirm before running them.
 - Keep work accumulated on `@` during normal iteration. Use `jj desc` at the start of a task and keep it accurate whenever the scope changes.
 - If `@` already has changes, update the description before continuing.
-- Use `jj new` only when the current task is complete enough to split from the next one.
+- Use `jj new` when the current task is coherent enough to split cleanly from the next one.
+- Use `jj split` as soon as `@` contains multiple intents.
+- Use `jj commit` sparingly, mainly when it is the clearest shorthand for describing the current change and starting the next one.
